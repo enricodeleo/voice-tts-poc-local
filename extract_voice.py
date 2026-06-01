@@ -97,7 +97,26 @@ def main():
             check=True,
         )
 
-    segments = json.loads(Path(args.diarization).read_text())
+    raw_segments = json.loads(Path(args.diarization).read_text())
+
+    # Normalize speaker field: accept both "speaker" (int) and "id"/"label" (Xenova format)
+    segments = []
+    for s in raw_segments:
+        if "speaker" in s:
+            speaker = s["speaker"]
+        elif "id" in s:
+            speaker = s["id"]
+        elif "label" in s:
+            speaker = int(s["label"].split("_")[-1])
+        else:
+            print(f"Error: no speaker/id/label field in segment: {s}", file=sys.stderr)
+            sys.exit(1)
+        segments.append({
+            "start": s["start"],
+            "end": s["end"],
+            "speaker": speaker,
+            "text": s.get("text", ""),
+        })
 
     speakers = sorted(set(s["speaker"] for s in segments))
     print(f"Found {len(speakers)} speakers: {speakers}")
