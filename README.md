@@ -162,18 +162,36 @@ ffmpeg -i output/synth.wav -codec:a libmp3lame -qscale:a 2 output/clone.mp3
 
 ### Extracting a Voice from a Podcast
 
-If you have a multi-speaker recording and want to isolate one speaker for voice cloning, use `extract_voice.py`. This requires a diarization JSON file produced by any speaker diarization tool.
+If you have a multi-speaker recording and want to isolate one speaker for voice cloning, use `extract_voice.py`. This requires a diarization JSON file that tells the script who speaks when.
 
-**Diarization JSON format:**
+You can produce this JSON in two ways:
+
+1. **Export from a diarization tool** — many tools (like [Xenova](https://huggingface.co/spaces/Xenova/whisper-speaker-diarization)) can output structured results via the browser console
+2. **Create it manually** — run any diarization tool, note the timestamps and speaker labels from its output, and write the JSON by hand
+
+**Format 1 — Simple (`speaker` field):**
 
 ```json
 [
   {"start": 0.0, "end": 5.2, "speaker": 0, "text": "Hello and welcome"},
-  {"start": 5.5, "end": 9.8, "speaker": 1, "text": "Thanks for having me"}
+  {"start": 5.5, "end": 9.8, "speaker": 1, "text": "Thanks for having me"},
+  {"start": 10.0, "end": 15.0, "speaker": 0, "text": "Great to be here"}
 ]
 ```
 
-The script also accepts the Xenova format (`id`/`label` fields instead of `speaker`).
+**Format 2 — Xenova / pyannote style (`id`/`label` fields):**
+
+```json
+[
+  {"start": 0.0, "end": 5.2, "id": 0, "label": "SPEAKER_00", "text": "Hello and welcome"},
+  {"start": 5.5, "end": 9.8, "id": 1, "label": "SPEAKER_01", "text": "Thanks for having me"}
+]
+```
+
+Both formats work. Each segment needs:
+- `start` / `end` — timestamps in seconds
+- A speaker identifier — either `speaker` (integer), `id` (integer), or `label` (string like `"SPEAKER_00"`)
+- `text` — optional, used for reference transcript
 
 **Step 1 — Extract samples to identify speakers:**
 
