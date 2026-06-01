@@ -88,7 +88,7 @@ Provide a short reference audio clip (10-30 seconds of clean speech) along with 
 ```bash
 uv run synthesize.py \
   --text "Ciao, piacere di conoscerti" \
-  --ref_audio output/enrico_voice.wav \
+  --ref_audio output/my_voice.wav \
   --ref_text "Questo è un esempio della mia voce per il cloning"
 ```
 
@@ -98,7 +98,7 @@ You can also combine voice cloning with instruct for controllable cloning:
 uv run synthesize.py \
   --text "Parla più lentamente, per favore" \
   --instruct "speak slowly and clearly" \
-  --ref_audio output/enrico_voice.wav \
+  --ref_audio output/my_voice.wav \
   --ref_text "reference transcript here"
 ```
 
@@ -108,8 +108,8 @@ VoxCPM2 can clone a voice from a reference in one language and synthesize in ano
 
 ```bash
 uv run synthesize.py \
-  --text "Would my princess like I start the process for dinner?" \
-  --ref_audio output/enrico_voice.wav \
+  --text "Mamma mia, it's-a me, your favorite Italian plumber!" \
+  --ref_audio output/my_voice.wav \
   --ref_text "La prima cosa che vuoi sapere è se questa roba può trovare il proprio mercato"
 ```
 
@@ -157,7 +157,7 @@ uv run synthesize.py \
 **Step 5 — Convert to MP3 (optional)**
 
 ```bash
-ffmpeg -i output/20260601_194715.wav -codec:a libmp3lame -qscale:a 2 output/clone.mp3
+ffmpeg -i output/synth.wav -codec:a libmp3lame -qscale:a 2 output/clone.mp3
 ```
 
 ### Extracting a Voice from a Podcast
@@ -192,7 +192,7 @@ uv run extract_voice.py \
   --audio "podcast.mp3" \
   --diarization diarization.json \
   --speaker 1 \
-  --output output/enrico_voice.wav
+  --output output/my_voice.wav
 ```
 
 This concatenates all of speaker 1's segments into a single WAV file, ready to use as `--ref_audio` for voice cloning.
