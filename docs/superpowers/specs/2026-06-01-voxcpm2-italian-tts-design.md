@@ -7,9 +7,10 @@ Prove that VoxCPM2 can synthesize Italian speech on Apple Silicon using the 4-bi
 ## Context
 
 - **Hardware:** MacBook Air M4, 24 GB RAM
-- **Model:** `mlx-community/VoxCPM2-4bit` (2B params, 4-bit quantized LM, full-precision VAE/DiT, ~2.3 GB memory, 0.90x RTF)
+- **Model:** `mlx-community/VoxCPM2-4bit` (2B params, 4-bit quantized LM, full-precision VAE/DiT, ~2.3 GB memory, ~0.90x RTF)
 - **Framework:** `mlx-audio` handles all MLX inference plumbing
-- **Language:** Python 3.12 (via uv, since system Python is 3.14 and VoxCPM2 requires <3.13)
+- **Runtime:** Python 3.12 (via uv, since system Python is 3.14 and mlx-audio requires <3.13)
+- **Caveat:** VoxCPM2 support in mlx-audio is relatively new. If the `mlx-community/VoxCPM2-4bit` model doesn't load, we may need to update mlx-audio to the latest version or use the CLI directly (`python -m mlx_audio.tts.generate`).
 
 ## Architecture
 
@@ -45,15 +46,17 @@ uv run synthesize.py --file input.txt --output speech.wav
 
 ### Behavior
 
-1. Validate input (exactly one of `--text` or `--file`)
-2. Load model via `mlx_audio.tts.load_model("mlx-community/VoxCPM2-4bit")` (cached after first download)
-3. Generate audio with sensible defaults (7 inference timesteps, cfg_value 2.0)
-4. Save as 48kHz WAV to the specified output path
-5. Print the output file path
+1. Validate input — exactly one of `--text` or `--file` must be provided; exit with non-zero code and error message on failure
+2. Auto-create `output/` directory if it doesn't exist
+3. Load model via `from mlx_audio.tts.utils import load_model` → `load_model("mlx-community/VoxCPM2-4bit")` (cached by Hugging Face after first download)
+4. Generate audio via `model.generate(text=..., inference_timesteps=7, cfg_value=2.0)` — these are the recommended defaults from the model's HF page, passed explicitly
+5. Convert the returned `mx.array` waveform to WAV using `soundfile.write()` at 48kHz
+6. Print the output file path
 
 ## Dependencies
 
 - `mlx-audio` — MLX-based TTS inference for Apple Silicon
+- `soundfile` — WAV serialization from numpy/mx.array (lightweight, no ffmpeg needed)
 - Python >=3.10, <3.13 (managed by uv)
 
 ## Out of Scope
