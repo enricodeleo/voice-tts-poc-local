@@ -89,6 +89,64 @@ uv run synthesize.py \
   --ref_text "reference transcript here"
 ```
 
+### Cross-Lingual Cloning
+
+VoxCPM2 can clone a voice from a reference in one language and synthesize in another. For example, cloning an Italian voice and speaking English:
+
+```bash
+uv run synthesize.py \
+  --text "Would my princess like I start the process for dinner?" \
+  --ref_audio output/enrico_voice.wav \
+  --ref_text "La prima cosa che vuoi sapere è se questa roba può trovare il proprio mercato"
+```
+
+The `--ref_text` should match the language spoken in the reference audio (Italian in this case), while `--text` can be in any of the 30 supported languages.
+
+### Full Walkthrough: Clone Your Voice from a Podcast
+
+This is the end-to-end flow: take a podcast, isolate your voice, then clone it.
+
+**Step 1 — Diarize the podcast**
+
+Run the podcast through a speaker diarization tool (e.g., [Xenova Whisper Speaker Diarization](https://huggingface.co/spaces/Xenova/whisper-speaker-diarization), [pyannote.audio](https://github.com/pyannote/pyannote-audio), [WhisperX](https://github.com/m-bain/whisperX)). Save the output as a JSON file with timestamped segments and speaker labels.
+
+**Step 2 — Extract sample clips to identify yourself**
+
+```bash
+uv run extract_voice.py \
+  --audio "podcast.mp3" \
+  --diarization diarization.json
+```
+
+This creates short sample WAVs per speaker (`output/speaker_0_sample.wav`, etc.). Listen to each to find which speaker ID is you.
+
+**Step 3 — Extract all your segments**
+
+```bash
+uv run extract_voice.py \
+  --audio "podcast.mp3" \
+  --diarization diarization.json \
+  --speaker 0 \
+  --output output/my_voice.wav
+```
+
+This concatenates all your speaking turns into a single reference WAV. More reference audio = better clone quality.
+
+**Step 4 — Clone your voice**
+
+```bash
+uv run synthesize.py \
+  --text "Ciao, questa è la mia voce clonata" \
+  --ref_audio output/my_voice.wav \
+  --ref_text "La prima cosa che vuoi sapere se questa roba può trovare il proprio mercato"
+```
+
+**Step 5 — Convert to MP3 (optional)**
+
+```bash
+ffmpeg -i output/20260601_194715.wav -codec:a libmp3lame -qscale:a 2 output/clone.mp3
+```
+
 ### Extracting a Voice from a Podcast
 
 If you have a multi-speaker recording and want to isolate one speaker for voice cloning, use `extract_voice.py`. This requires a diarization JSON file produced by any speaker diarization tool.
