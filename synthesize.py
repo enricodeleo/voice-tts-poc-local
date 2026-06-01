@@ -29,7 +29,11 @@ def main():
     if args.text:
         text = args.text
     else:
-        text = Path(args.file).read_text().strip()
+        filepath = Path(args.file)
+        if not filepath.is_file():
+            print(f"Error: file not found: {filepath}", file=sys.stderr)
+            sys.exit(1)
+        text = filepath.read_text().strip()
 
     if not text:
         print("Error: empty text input", file=sys.stderr)
@@ -48,6 +52,8 @@ def main():
     model = load_model("mlx-community/VoxCPM2-4bit")
 
     print(f"Generating speech for: {text[:80]}{'...' if len(text) > 80 else ''}")
+    audio = None
+    sample_rate = None
     for result in model.generate(
         text=text,
         inference_timesteps=7,
@@ -55,6 +61,10 @@ def main():
     ):
         audio = np.array(result.audio, dtype=np.float32)
         sample_rate = result.sample_rate
+
+    if audio is None:
+        print("Error: model produced no audio", file=sys.stderr)
+        sys.exit(1)
 
     sf.write(output_path, audio, sample_rate)
     print(f"Saved to {output_path}")
