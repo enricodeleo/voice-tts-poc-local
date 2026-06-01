@@ -89,7 +89,7 @@ Provide a short reference audio clip (10-30 seconds of clean speech) along with 
 uv run synthesize.py \
   --text "Ciao, piacere di conoscerti" \
   --ref_audio output/my_voice.wav \
-  --ref_text "Questo è un esempio della mia voce per il cloning"
+  --ref_text "Oggi voglio parlarvi di un argomento molto interessante"
 ```
 
 You can also combine voice cloning with instruct for controllable cloning:
@@ -110,7 +110,7 @@ VoxCPM2 can clone a voice from a reference in one language and synthesize in ano
 uv run synthesize.py \
   --text "Mamma mia, it's-a me, your favorite Italian plumber!" \
   --ref_audio output/my_voice.wav \
-  --ref_text "La prima cosa che vuoi sapere è se questa roba può trovare il proprio mercato"
+  --ref_text "Oggi pomeriggio abbiamo visitato il nuovo museo d'arte contemporanea"
 ```
 
 The `--ref_text` should match the language spoken in the reference audio (Italian in this case), while `--text` can be in any of the 30 supported languages.
@@ -149,9 +149,9 @@ This concatenates all your speaking turns into a single reference WAV. More refe
 
 ```bash
 uv run synthesize.py \
-  --text "Ciao, questa è la mia voce clonata" \
+  --text "Ciao, questa è una voce generata con l'intelligenza artificiale" \
   --ref_audio output/my_voice.wav \
-  --ref_text "La prima cosa che vuoi sapere se questa roba può trovare il proprio mercato"
+  --ref_text "Oggi pomeriggio abbiamo visitato il nuovo museo d'arte"
 ```
 
 **Step 5 — Convert to MP3 (optional)**
