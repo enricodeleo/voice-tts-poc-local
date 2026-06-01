@@ -1,0 +1,11 @@
+[project]
+name = "voice-tts"
+version = "0.1.0"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "mlx-audio",
+    "soundfile",
+]
+
+[tool.uv]
+python = "3.12"
