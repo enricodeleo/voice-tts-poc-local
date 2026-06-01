@@ -25,21 +25,34 @@ There's also a helper script (`extract_voice.py`) for isolating a specific speak
 ## Requirements
 
 - **Mac with Apple Silicon** (M1 Pro/Max or newer recommended)
-- **Python 3.12** (managed automatically by uv — system Python is not used)
-- **[uv](https://docs.astral.sh/uv/)** — Python package manager
-- **ffmpeg** — for MP3/WAV conversion (`brew install ffmpeg`)
-- ~3 GB disk space for the model (downloaded once, cached by Hugging Face)
+- **~3 GB disk space** for the model (downloaded once, cached by Hugging Face)
+
+Everything else is installed by `uv sync`:
+
+| What | Installed how | Notes |
+|------|---------------|-------|
+| **[uv](https://docs.astral.sh/uv/)** | Manual — `curl -LsSf https://astral.sh/uv/install.sh \| sh` | Python package manager |
+| **ffmpeg** | Manual — `brew install ffmpeg` | MP3 conversion, audio resampling. Not needed for WAV-only output |
+| **Python 3.12** | Automatic via uv | Managed in project `.venv/`, system Python is not used |
+| **mlx** | Automatic via `uv sync` | Apple's ML framework (pip dependency of mlx-audio) |
+| **mlx-audio** | Automatic via `uv sync` | TTS/STT inference engine (pinned to GitHub main for VoxCPM2 support) |
+| **soundfile** | Automatic via `uv sync` | WAV file writing |
+| **numpy** | Automatic via `uv sync` | Audio array processing |
 
 ## Setup
 
 ```bash
-# Clone and enter the project
-cd voice-tts
+# 1. Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies (uv handles Python 3.12 automatically)
+# 2. Install ffmpeg (if not already installed — needed for MP3 support)
+brew install ffmpeg
+
+# 3. Enter the project and install all Python dependencies
+cd voice-tts
 uv sync
 
-# First run will download the VoxCPM2-4bit model (~2.3 GB)
+# 4. Test it — first run downloads the VoxCPM2-4bit model (~2.3 GB)
 uv run synthesize.py --text "Buongiorno, come stai oggi?"
 ```
 
