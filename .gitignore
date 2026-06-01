@@ -5,3 +5,4 @@ output/
 .venv/
 .claude/
 docs/superpowers/
+enrico_speaks.sh
