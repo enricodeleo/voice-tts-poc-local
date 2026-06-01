@@ -15,6 +15,11 @@ def parse_args():
     )
     parser.add_argument("--audio", required=True, help="Input audio file (mp3/wav)")
     parser.add_argument(
+        "--diarization",
+        required=True,
+        help="Path to diarization JSON file with segments",
+    )
+    parser.add_argument(
         "--speaker",
         type=int,
         default=None,
@@ -32,29 +37,6 @@ def parse_args():
         help="Output WAV path (default: output/speaker_<N>.wav)",
     )
     return parser.parse_args()
-
-
-def diarize(audio_path):
-    from mlx_audio.stt.utils import load
-
-    print("Loading VibeVoice-ASR model (9B params, ~18GB)...")
-    print("This may take a few minutes on first run (model download).")
-    model = load("mlx-community/VibeVoice-ASR-bf16")
-
-    print(f"Running diarization on {audio_path}...")
-    result = model.generate(audio=audio_path, max_tokens=8192, temperature=0.0)
-
-    segments = []
-    for seg in result.segments:
-        segments.append({
-            "start": seg["start_time"],
-            "end": seg["end_time"],
-            "speaker": seg["speaker_id"],
-            "text": seg["text"],
-        })
-
-    segments.sort(key=lambda s: s["start"])
-    return segments
 
 
 def extract_segments(audio_path, segments, speaker_id):
@@ -115,24 +97,14 @@ def main():
             check=True,
         )
 
-    segments_path = "output/diarization.json"
-    if os.path.exists(segments_path):
-        print(f"Loading cached diarization from {segments_path}")
-        segments = json.loads(Path(segments_path).read_text())
-    else:
-        segments = diarize(wav_path)
-        os.makedirs("output", exist_ok=True)
-        Path(segments_path).write_text(json.dumps(segments, indent=2))
-        print(f"Diarization saved to {segments_path}")
+    segments = json.loads(Path(args.diarization).read_text())
 
     speakers = sorted(set(s["speaker"] for s in segments))
-    print(f"\nFound {len(speakers)} speakers: {speakers}")
+    print(f"Found {len(speakers)} speakers: {speakers}")
 
-    speaker_stats = {}
     for sid in speakers:
         segs = [s for s in segments if s["speaker"] == sid]
         total = sum(s["end"] - s["start"] for s in segs)
-        speaker_stats[sid] = {"segments": len(segs), "total_seconds": round(total, 1)}
         print(f"  Speaker {sid}: {len(segs)} segments, {total:.1f}s total")
 
     if args.speaker is None:
@@ -146,7 +118,7 @@ def main():
                 print(f"  Speaker {sid} sample: {out_path}")
 
         print("\nListen to the samples and re-run with --speaker <ID> to extract full voice.")
-        print("Example: uv run extract_voice.py --audio 'podcast.mp3' --speaker 0")
+        print("Example: uv run extract_voice.py --audio 'podcast.mp3' --diarization diarization.json --speaker 0")
         return
 
     print(f"\nExtracting all segments for speaker {args.speaker}...")
