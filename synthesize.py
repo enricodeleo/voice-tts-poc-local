@@ -20,6 +20,18 @@ def parse_args():
         "--output",
         help="Output WAV path (default: output/<timestamp>.wav)",
     )
+    parser.add_argument(
+        "--instruct",
+        help="Voice design: describe the voice (e.g. 'A young Italian woman, warm tone')",
+    )
+    parser.add_argument(
+        "--ref_audio",
+        help="Voice cloning: path to reference audio file",
+    )
+    parser.add_argument(
+        "--ref_text",
+        help="Voice cloning: transcript of the reference audio",
+    )
     return parser.parse_args()
 
 
@@ -51,14 +63,25 @@ def main():
     print("Loading model...")
     model = load_model("mlx-community/VoxCPM2-4bit")
 
-    print(f"Generating speech for: {text[:80]}{'...' if len(text) > 80 else ''}")
-    audio = None
-    sample_rate = None
-    for result in model.generate(
+    generate_kwargs = dict(
         text=text,
         inference_timesteps=7,
         cfg_value=2.0,
-    ):
+    )
+    if args.instruct:
+        generate_kwargs["instruct"] = args.instruct
+    if args.ref_audio:
+        if not os.path.isfile(args.ref_audio):
+            print(f"Error: reference audio not found: {args.ref_audio}", file=sys.stderr)
+            sys.exit(1)
+        generate_kwargs["ref_audio"] = args.ref_audio
+        if args.ref_text:
+            generate_kwargs["ref_text"] = args.ref_text
+
+    print(f"Generating speech for: {text[:80]}{'...' if len(text) > 80 else ''}")
+    audio = None
+    sample_rate = None
+    for result in model.generate(**generate_kwargs):
         audio = np.array(result.audio, dtype=np.float32)
         sample_rate = result.sample_rate
 
