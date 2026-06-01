@@ -91,9 +91,19 @@ uv run synthesize.py \
 
 ### Extracting a Voice from a Podcast
 
-If you have a multi-speaker recording and want to isolate one speaker for voice cloning, use `extract_voice.py`. This requires a diarization JSON file (produced by an external tool — see below).
+If you have a multi-speaker recording and want to isolate one speaker for voice cloning, use `extract_voice.py`. This requires a diarization JSON file produced by an external diarization tool.
 
-**Diarization JSON format:**
+**Recommended tool:** [Xenova Whisper Speaker Diarization](https://huggingface.co/spaces/Xenova/whisper-speaker-diarization) — runs entirely in your browser, no signup needed.
+
+**How to get the diarization JSON from Xenova:**
+
+1. Open the [Space](https://huggingface.co/spaces/Xenova/whisper-speaker-diarization) in your browser
+2. Upload your audio file and select Italian as the language
+3. Click "Load model" then "Run model"
+4. Open your browser's Developer Tools (F12) → Console
+5. The results are logged as `{ transcript, segments }` — copy the `segments` array and save it as a JSON file
+
+The script accepts the Xenova format directly (segments with `start`/`end`/`id`/`label` fields). It also supports a simpler format with `speaker` as an integer:
 
 ```json
 [
@@ -101,8 +111,6 @@ If you have a multi-speaker recording and want to isolate one speaker for voice 
   {"start": 5.5, "end": 9.8, "speaker": 1, "text": "Thanks for having me"}
 ]
 ```
-
-Each segment has `start`/`end` timestamps in seconds, a `speaker` ID (integer), and optional `text`.
 
 **Step 1 — Extract samples to identify speakers:**
 
@@ -126,9 +134,9 @@ uv run extract_voice.py \
 
 This concatenates all of speaker 1's segments into a single WAV file, ready to use as `--ref_audio` for voice cloning.
 
-**Producing the diarization JSON:** Use any speaker diarization service or tool that outputs timestamped segments with speaker labels. Options include:
+**Alternative diarization tools:**
 - [pyannote.audio](https://github.com/pyannote/pyannote-audio) (Python, open source)
-- [Whisper + diarization](https://github.com/pyannote/pyannote-audio) pipelines
+- [WhisperX](https://github.com/m-bain/whisperX) (Python, open source)
 - Cloud services (AssemblyAI, Deepgram, etc.)
 
 ## Project Structure
