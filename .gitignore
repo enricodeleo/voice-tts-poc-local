@@ -7,3 +7,5 @@ output/
 docs/superpowers/
 enrico_speaks.sh
 CLAUDE.md
+.codegraph/
+.wolf/

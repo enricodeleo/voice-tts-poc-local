@@ -32,6 +32,12 @@ def parse_args():
         "--ref_text",
         help="Voice cloning: transcript of the reference audio",
     )
+    parser.add_argument(
+        "--timesteps",
+        type=int,
+        default=7,
+        help="Inference timesteps (default: 7, try 10-12 for better endings)",
+    )
     return parser.parse_args()
 
 
@@ -65,7 +71,7 @@ def main():
 
     generate_kwargs = dict(
         text=text,
-        inference_timesteps=7,
+        inference_timesteps=args.timesteps,
         cfg_value=2.0,
     )
     if args.instruct:

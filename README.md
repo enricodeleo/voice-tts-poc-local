@@ -92,15 +92,34 @@ uv run synthesize.py \
   --ref_text "Oggi voglio parlarvi di un argomento molto interessante"
 ```
 
-You can also combine voice cloning with instruct for controllable cloning:
+### Non-Verbal Tags
+
+VoxCPM2 supports non-verbal tags in square brackets directly in the `--text` string to add expressiveness — laughs, sighs, pauses, and more. These work in all modes including voice cloning.
+
+| Category | Tags |
+|----------|------|
+| Laughs and sighs | `[laughing]`, `[sigh]` |
+| Pauses and thinking | `[Uhm]`, `[Shh]` |
+| Questions | `[Question-ah]`, `[Question-ei]`, `[Question-en]`, `[Question-oh]` |
+| Emotions | `[Surprise-wa]`, `[Surprise-yo]`, `[Dissatisfaction-hnn]` |
+
+Examples:
 
 ```bash
 uv run synthesize.py \
-  --text "Parla più lentamente, per favore" \
-  --instruct "speak slowly and clearly" \
+  --text "Ciao, [Uhm] benvenuti al podcast di oggi" \
   --ref_audio output/my_voice.wav \
   --ref_text "reference transcript here"
 ```
+
+```bash
+uv run synthesize.py \
+  --text "[laughing] Dai, andiamo a mangiare una pizza! [sigh] Che bella giornata."
+```
+
+> **Use sparingly.** Lowercase forms like `[laughing]` work better than variants like `[Laughter]`. Avoid stacking too many tags in a single sentence.
+>
+> **Note on control instructions:** `()` instructions (e.g. `(slow, warm tone)`) and the `--instruct` flag only work in **Voice Design** and **Controllable Cloning** modes. When using `--ref_audio` + `--ref_text` together (Hi-Fi Cloning mode, used by `enrico_speaks.sh`), these are **ignored** — the model prioritizes maximum voice fidelity. To use style control with a cloned voice, use `--ref_audio` only (no `--ref_text`), which trades some fidelity for the ability to steer tone and pacing. See [VoxCPM docs](https://voxcpm.readthedocs.io/en/latest/usage_guide.html) for details.
 
 ### Cross-Lingual Cloning
 
